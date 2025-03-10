@@ -44,7 +44,7 @@ const getNetworkAddresses = () => {
     return addresses;
   };
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running at the following links:`);
     console.log(`- Local: http://localhost:${PORT}`);
