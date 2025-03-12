@@ -2,6 +2,8 @@ import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import os from 'os';
+import { Employee } from './Handler/Employee.mjs';
+import { Client } from './Handler/Client.mjs';
 
 const app = express();
 const server = createServer(app);
@@ -9,23 +11,20 @@ const io = new Server(server, {
     cors: { origin: '*' }, // Allow all origins (Adjust as needed)
 });
 
-const employeeLocations = new Map(); // Use Map for better performance
+const employeeLocations = new Map();
+const socketEmployeeMap = new Map(); 
 
 io.on('connection', (socket) => {
-    console.log('New client connected');
 
-    socket.on('updateLocation', ({ employeeId, latitude, longitude }) => {
-        employeeLocations.set(employeeId, { latitude, longitude });
-        console.log(`Updated location for ${employeeId}: ${latitude}, ${longitude}`);
-
-        // Broadcast location update to all clients
-        io.emit('locationUpdate', Object.fromEntries(employeeLocations));
-    });
-console.log(employeeLocations)
-    socket.on('disconnect', () => {
-      console.log(employeeLocations)
-        console.log('Client disconnected');
-    });
+    socket.on("identify",(user_type)=>{
+      if(user_type == "employee"){
+        new Employee(socket,employeeLocations, socketEmployeeMap,  io);
+      }else if(user_type == "client"){
+        new Client(socket,io,employeeLocations);
+      }else{
+        console.log("Unknow user")
+      }
+    })
 });
 
 const getNetworkAddresses = () => {
